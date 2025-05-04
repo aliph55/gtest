@@ -1,64 +1,31 @@
-import React, {useEffect} from 'react';
-import {View, Button, NativeModules, NativeEventEmitter} from 'react-native';
+import React from 'react';
+import {View, Button, NativeModules} from 'react-native';
 
 const {AdMobInterstitialModule, AdMobRewardedModule} = NativeModules;
 
 const App = () => {
-  useEffect(() => {
-    // Her modül için ayrı emitter oluştur
-    const interstitialEmitter = new NativeEventEmitter(AdMobInterstitialModule);
-    const rewardedEmitter = new NativeEventEmitter(AdMobRewardedModule);
-
-    // Interstitial reklam için hata dinleyici
-    const interstitialErrorSubscription = interstitialEmitter.addListener(
-      'onAdFailedToLoad',
-      error => {
-        console.log(`Interstitial reklam yüklenemedi: ${error}`);
-        alert(`Interstitial reklam yüklenemedi: ${error}`);
-      },
-    );
-
-    // Rewarded reklam için ödül dinleyici
-    const rewardSubscription = rewardedEmitter.addListener(
-      'onRewardEarned',
-      amount => {
-        console.log(`Ödül kazanıldı: ${amount}`);
-        alert(`Ödül kazanıldı: ${amount}`);
-      },
-    );
-
-    // Rewarded reklam için hata dinleyici
-    const rewardedErrorSubscription = rewardedEmitter.addListener(
-      'onAdFailedToLoad',
-      error => {
-        console.log(`Ödüllü reklam yüklenemedi: ${error}`);
-        alert(`Ödüllü reklam yüklenemedi: ${error}`);
-      },
-    );
-
-    // Emitter'ların doğru şekilde oluşturulduğunu logla
-    console.log('Emitterlar oluşturuldu:', {
-      interstitialEmitter,
-      rewardedEmitter,
-    });
-
-    // Temizlik fonksiyonu
-    return () => {
-      console.log('Dinleyiciler kaldırılıyor...');
-      interstitialErrorSubscription.remove();
-      rewardSubscription.remove();
-      rewardedErrorSubscription.remove();
-    };
-  }, []);
-
-  const showInterstitialAd = () => {
+  const showInterstitialAd = async () => {
     console.log('Interstitial reklam yükleniyor...');
-    AdMobInterstitialModule.loadAndShowInterstitialAd();
+    try {
+      const result = await AdMobInterstitialModule.loadAndShowInterstitialAd();
+      console.log(result);
+      alert(result);
+    } catch (error) {
+      console.log(`Interstitial reklam yüklenemedi: ${error.message}`);
+      alert(`Interstitial reklam yüklenemedi: ${error.message}`);
+    }
   };
 
-  const showRewardedAd = () => {
+  const showRewardedAd = async () => {
     console.log('Ödüllü reklam yükleniyor...');
-    AdMobRewardedModule.loadAndShowRewardedAd();
+    try {
+      const rewardAmount = await AdMobRewardedModule.loadAndShowRewardedAd();
+      console.log(`Ödül kazanıldı: ${rewardAmount}`);
+      alert(`Ödül kazanıldı: ${rewardAmount}`);
+    } catch (error) {
+      console.log(`Ödüllü reklam yüklenemedi: ${error.message}`);
+      alert(`Ödüllü reklam yüklenemedi: ${error.message}`);
+    }
   };
 
   return (
