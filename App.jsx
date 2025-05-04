@@ -3,11 +3,13 @@ import {View, Button, NativeModules, NativeEventEmitter} from 'react-native';
 
 const {AdMobInterstitialModule, AdMobRewardedModule} = NativeModules;
 
-const interstitialEmitter = new NativeEventEmitter(AdMobInterstitialModule);
-const rewardedEmitter = new NativeEventEmitter(AdMobRewardedModule);
-
 const App = () => {
   useEffect(() => {
+    // Her modül için ayrı emitter oluştur
+    const interstitialEmitter = new NativeEventEmitter(AdMobInterstitialModule);
+    const rewardedEmitter = new NativeEventEmitter(AdMobRewardedModule);
+
+    // Interstitial reklam için hata dinleyici
     const interstitialErrorSubscription = interstitialEmitter.addListener(
       'onAdFailedToLoad',
       error => {
@@ -16,6 +18,7 @@ const App = () => {
       },
     );
 
+    // Rewarded reklam için ödül dinleyici
     const rewardSubscription = rewardedEmitter.addListener(
       'onRewardEarned',
       amount => {
@@ -24,6 +27,7 @@ const App = () => {
       },
     );
 
+    // Rewarded reklam için hata dinleyici
     const rewardedErrorSubscription = rewardedEmitter.addListener(
       'onAdFailedToLoad',
       error => {
@@ -32,7 +36,15 @@ const App = () => {
       },
     );
 
+    // Emitter'ların doğru şekilde oluşturulduğunu logla
+    console.log('Emitterlar oluşturuldu:', {
+      interstitialEmitter,
+      rewardedEmitter,
+    });
+
+    // Temizlik fonksiyonu
     return () => {
+      console.log('Dinleyiciler kaldırılıyor...');
       interstitialErrorSubscription.remove();
       rewardSubscription.remove();
       rewardedErrorSubscription.remove();
@@ -40,10 +52,12 @@ const App = () => {
   }, []);
 
   const showInterstitialAd = () => {
+    console.log('Interstitial reklam yükleniyor...');
     AdMobInterstitialModule.loadAndShowInterstitialAd();
   };
 
   const showRewardedAd = () => {
+    console.log('Ödüllü reklam yükleniyor...');
     AdMobRewardedModule.loadAndShowRewardedAd();
   };
 

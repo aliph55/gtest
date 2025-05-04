@@ -1,5 +1,6 @@
 package com.gtest
 
+import android.util.Log
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -16,44 +17,49 @@ class AdMobRewardedModule(reactContext: ReactApplicationContext) : ReactContextB
 
     @ReactMethod
     fun loadAndShowRewardedAd() {
-        // Ana iş parçacığında çalıştır
+        Log.d("AdMobRewarded", "loadAndShowRewardedAd called")
         currentActivity?.runOnUiThread {
-            val adRequest = AdRequest.Builder()
-                .addTestDevice("YOUR_DEVICE_ID") // Logcat'ten aldığınız cihaz ID'sini buraya ekleyin
-                .build()
+            Log.d("AdMobRewarded", "Running on UI thread")
+            val adRequest = AdRequest.Builder().build() // addTestDevice kaldırıldı
             RewardedAd.load(
                 reactApplicationContext,
                 "ca-app-pub-3940256099942544/5224354917", // Test Rewarded Ad Unit ID
                 adRequest,
                 object : RewardedAdLoadCallback() {
                     override fun onAdLoaded(ad: RewardedAd) {
+                        Log.d("AdMobRewarded", "Rewarded ad loaded successfully")
                         rewardedAd = ad
                         currentActivity?.let { activity ->
                             rewardedAd?.show(activity) { rewardItem ->
+                                Log.d("AdMobRewarded", "Reward earned: ${rewardItem.amount}")
                                 reactApplicationContext
                                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
                                     .emit("onRewardEarned", rewardItem.amount)
                             }
+                            Log.d("AdMobRewarded", "Rewarded ad shown")
                         } ?: run {
+                            Log.d("AdMobRewarded", "Activity is null during ad show")
                             reactApplicationContext
                                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-                                .emit("onAdFailedToLoad", "Activity is null")
+                                .emit("onAdFailedToLoad", "Activity is null during ad show")
                         }
                     }
 
                     override fun onAdFailedToLoad(error: LoadAdError) {
+                        Log.e("AdMobRewarded", "Ad failed to load: Error Code: ${error.code}, Message: ${error.message}, Domain: ${error.domain}, Cause: ${error.cause?.toString() ?: "Unknown"}")
                         rewardedAd = null
+                        val errorMessage = "Error Code: ${error.code}, Message: ${error.message}, Domain: ${error.domain}, Cause: ${error.cause?.toString() ?: "Unknown"}"
                         reactApplicationContext
                             .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-                            .emit("onAdFailedToLoad", error.message)
+                            .emit("onAdFailedToLoad", errorMessage)
                     }
                 }
             )
         } ?: run {
-            // Activity null ise hata gönder
+            Log.e("AdMobRewarded", "Activity is null during ad load")
             reactApplicationContext
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-                .emit("onAdFailedToLoad", "Activity is null")
+                .emit("onAdFailedToLoad", "Activity is null during ad load")
         }
     }
 }
