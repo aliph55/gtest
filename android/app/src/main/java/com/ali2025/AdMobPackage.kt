@@ -1,4 +1,4 @@
-package com.gtest
+package com.ali2025.proai
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

@@ -1,39 +1,94 @@
-import React from 'react';
-import {View, Button, NativeModules} from 'react-native';
-
-const {AdMobInterstitialModule, AdMobRewardedModule} = NativeModules;
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithCredential,
+} from 'firebase/auth';
+import {auth} from './firebaseConfig';
 
 const App = () => {
-  const showInterstitialAd = async () => {
-    console.log('Interstitial reklam yükleniyor...');
-    try {
-      const result = await AdMobInterstitialModule.loadAndShowInterstitialAd();
-      console.log(result);
-      alert(result);
-    } catch (error) {
-      console.log(`Interstitial reklam yüklenemedi: ${error.message}`);
-      alert(`Interstitial reklam yüklenemedi: ${error.message}`);
-    }
-  };
+  const [user, setUser] = useState(null);
 
-  const showRewardedAd = async () => {
-    console.log('Ödüllü reklam yükleniyor...');
-    try {
-      const rewardAmount = await AdMobRewardedModule.loadAndShowRewardedAd();
-      console.log(`Ödül kazanıldı: ${rewardAmount}`);
-      alert(`Ödül kazanıldı: ${rewardAmount}`);
-    } catch (error) {
-      console.log(`Ödüllü reklam yüklenemedi: ${error.message}`);
-      alert(`Ödüllü reklam yüklenemedi: ${error.message}`);
+  const [idToken, setIdToken] = useState('');
+
+  GoogleSignin.configure({
+    scopes: ['https://www.googleapis.com/auth/userinfo.profile'], // what API you want to access on behalf of the user, default is email and profile
+    webClientId:
+      '491406833717-quac7f0k5afo10r3rvq0vr51fl6ufl3q.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access). Required to get the `idToken` on the user object!
+    fflineAccess: true,
+    forceCodeForRefreshToken: true,
+    profileImageSize: 120,
+  });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, currentUser => {
+      //  console.log('currentUser: ', currentUser);
+      setUser(currentUser);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (idToken) {
+      // const {id_token} = response.params;
+      const credential = GoogleAuthProvider.credential(
+        user?.stsTokenManager?.accessToken,
+      );
+      signInWithCredential(auth, credential)
+        .then(userCredential => setUser(userCredential.user))
+        .catch(error => console.error(error));
     }
-  };
+  }, []);
 
   return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <Button title="Geçiş Reklamını Göster" onPress={showInterstitialAd} />
-      <Button title="Ödüllü Reklamı Göster" onPress={showRewardedAd} />
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+      <TouchableOpacity
+        onPress={async () => {
+          try {
+            await GoogleSignin.hasPlayServices();
+            const userInfo = await GoogleSignin.signIn();
+            // console.log('userInfo ', userInfo);
+            setIdToken(userInfo.data.idToken);
+            if (userInfo.type === 'success') {
+              console.log(userInfo);
+            }
+          } catch (error) {
+            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+              console.log('cancelled', error);
+              // user cancelled the login flow
+            } else if (error.code === statusCodes.IN_PROGRESS) {
+              console.log(
+                'operation (e.g. sign in) is in progress already',
+                error,
+              );
+              // operation (e.g. sign in) is in progress already
+            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+              // play services not available or outdated
+              console.log(' play services not available or outdated ', error);
+            } else if (error.code === statusCodes.SIGN_IN_REQUIRED) {
+              console.log('SIGN_IN_REQUIRED ', error);
+            } else {
+              // some other error happened
+              console.log('other ', error);
+            }
+          }
+        }}>
+        <Image source={require('./assets/google.png')} />
+      </TouchableOpacity>
     </View>
   );
 };
 
 export default App;
+
+const styles = StyleSheet.create({});
