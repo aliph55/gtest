@@ -1,4 +1,4 @@
-package com.gtest
+package com.ali2025.proai
 
 import android.util.Log
 import com.facebook.react.bridge.ReactApplicationContext

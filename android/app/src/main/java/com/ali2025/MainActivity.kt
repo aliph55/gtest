@@ -1,4 +1,4 @@
-package com.gtest
+package com.ali2025.proai
 
 import android.os.Bundle
 import com.facebook.react.ReactActivity
@@ -9,7 +9,7 @@ import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 
 class MainActivity : ReactActivity() {
-    override fun getMainComponentName(): String = "gtest"
+    override fun getMainComponentName(): String = "proai"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

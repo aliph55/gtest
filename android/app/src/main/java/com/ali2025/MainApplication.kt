@@ -1,4 +1,4 @@
-package com.gtest
+package com.ali2025.proai
 
 import android.app.Application
 import com.facebook.react.PackageList
