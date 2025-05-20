@@ -1,65 +1,35 @@
-<<<<<<< Updated upstream
-import React from 'react';
-import {View, Button, NativeModules} from 'react-native';
+import {StyleSheet, View} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Use FontAwesome
 
-const {AdMobInterstitialModule, AdMobRewardedModule} = NativeModules;
+import Home from './screens/Home';
+import Profile from './screens/Profile';
+import Chat from './screens/Chat';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+
+const Stack = createNativeStackNavigator();
 
 const App = () => {
-  const showInterstitialAd = async () => {
-    console.log('Interstitial reklam yükleniyor...');
-    try {
-      const result = await AdMobInterstitialModule.loadAndShowInterstitialAd();
-      console.log(result);
-      alert(result);
-    } catch (error) {
-      console.log(`Interstitial reklam yüklenemedi: ${error.message}`);
-      alert(`Interstitial reklam yüklenemedi: ${error.message}`);
-    }
-  };
-
-  const showRewardedAd = async () => {
-    console.log('Ödüllü reklam yükleniyor...');
-    try {
-      const rewardAmount = await AdMobRewardedModule.loadAndShowRewardedAd();
-      console.log(`Ödül kazanıldı: ${rewardAmount}`);
-      alert(`Ödül kazanıldı: ${rewardAmount}`);
-    } catch (error) {
-      console.log(`Ödüllü reklam yüklenemedi: ${error.message}`);
-      alert(`Ödüllü reklam yüklenemedi: ${error.message}`);
-    }
-  };
-=======
-import {View, Text} from 'react-native';
-import {createStaticNavigation} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
->>>>>>> Stashed changes
-
-function HomeScreen() {
   return (
-<<<<<<< Updated upstream
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <Button title="Geçiş Reklamını Göster" onPress={showInterstitialAd} />
-      <Button title="Ödüllü Reklamı Göster" onPress={showRewardedAd} />
-=======
-    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-      <Text>Home Screen</Text>
->>>>>>> Stashed changes
-    </View>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={Home}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="Chat" component={Chat} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
-}
+};
 
-<<<<<<< Updated upstream
 export default App;
-=======
-const RootStack = createNativeStackNavigator({
-  screens: {
-    Home: HomeScreen,
-  },
-});
 
-const Navigation = createStaticNavigation(RootStack);
-
-export default function App() {
-  return <Navigation />;
-}
->>>>>>> Stashed changes
+const styles = StyleSheet.create({});
